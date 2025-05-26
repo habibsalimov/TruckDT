@@ -1,0 +1,17 @@
+# Supabase Yapılandırması
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key-here
+
+# Flask Yapılandırması
+FLASK_ENV=development
+FLASK_DEBUG=True
+
+# Model Yapılandırması
+VEHICLE_MODEL_PATH=models/vehicle_detection.pt
+PLATE_MODEL_PATH=models/plate_detection.pt
+
+# Güvenlik
+SECRET_KEY=your-secret-key-here
+
+# Logging
+LOG_LEVEL=INFO 
