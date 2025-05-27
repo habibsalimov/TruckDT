@@ -229,4 +229,30 @@ class SupabaseDB:
         
         logger.info("📋 Tablo oluşturma SQL'i:")
         logger.info(tables_sql)
-        return tables_sql 
+        return tables_sql
+
+    def setup_demo_plates(self):
+        """Demo sistemini kurması için örnek plakaları ekle"""
+        demo_plates = [
+            "34ABC1234",  # Yetkili plaka
+            "06DEF5678",  # Yetkili plaka
+            "35GHI9012",  # Yetkili plaka
+            "07JKL3456",  # Yetkili plaka
+            "41MNO7890",  # Yetkili plaka
+        ]
+        
+        logger.info("🎭 Demo plakaları kuruluyor...")
+        
+        added_count = 0
+        for plate in demo_plates:
+            try:
+                if self.add_plate(plate):
+                    added_count += 1
+                    logger.info(f"✅ Demo plaka eklendi: {plate}")
+                else:
+                    logger.info(f"ℹ️ Demo plaka zaten mevcut: {plate}")
+            except Exception as e:
+                logger.warning(f"⚠️ Demo plaka eklenemedi {plate}: {str(e)}")
+        
+        logger.info(f"🎭 Demo kurulumu tamamlandı: {added_count} yeni plaka eklendi")
+        return added_count 

@@ -143,6 +143,32 @@ const CameraStream = ({ onDetectionResult, onProcessingChange }) => {
     }
   };
 
+  // Tespit sonuçlarını kontrol etmek için polling
+  useEffect(() => {
+    let pollingInterval;
+    
+    if (detectionActive) {
+      pollingInterval = setInterval(async () => {
+        try {
+          const response = await axios.get(`${API_BASE}/api/detection/latest`);
+          if (response.data.has_result) {
+            // Tespit sonucunu parent bileşene gönder
+            onDetectionResult(response.data.result);
+          }
+        } catch (error) {
+          // Polling hatalarını sessizce logla
+          console.debug('Polling hatası (normal):', error.message);
+        }
+      }, 1000); // Her saniye kontrol et
+    }
+    
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [detectionActive, API_BASE, onDetectionResult]);
+
   return (
     <Box>
       {/* Hata Mesajı */}

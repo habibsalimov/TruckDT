@@ -31,6 +31,9 @@ camera_id = 1  # Varsayılan olarak kamera 1
 camera_active = False
 detection_active = False
 
+# Son tespit sonucu için global değişken
+last_detection_result = None
+
 # Gelişmiş logging ayarla
 logging.basicConfig(
     level=logging.INFO,
@@ -68,6 +71,13 @@ try:
     logger.info("SupabaseDB bağlantısı kuruluyor...")
     supabase_db = SupabaseDB()
     logger.info("✅ SupabaseDB başarıyla bağlandı")
+    
+    # Demo plakaları kur
+    try:
+        supabase_db.setup_demo_plates()
+    except Exception as demo_error:
+        logger.warning(f"⚠️ Demo plaka kurulumu başarısız: {str(demo_error)}")
+        
 except Exception as e:
     logger.error(f"❌ SupabaseDB bağlantı hatası: {str(e)}")
     logger.error(traceback.format_exc())
@@ -191,6 +201,17 @@ def generate_frames():
                                                         cv2.putText(frame, f"ERISIM REDDEDILDI: {plate_text}", 
                                                                    (10, frame.shape[0] - 60), 
                                                                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+                                                    
+                                                    # Son tespit sonucunu global değişkene kaydet
+                                                    global last_detection_result
+                                                    last_detection_result = {
+                                                        'plate_text': plate_text,
+                                                        'vehicle_type': truck['class_name'],
+                                                        'gate_action': gate_action,
+                                                        'is_authorized': is_authorized,
+                                                        'timestamp': datetime.now().isoformat(),
+                                                        'access_granted': access_granted
+                                                    }
                                                     
                                                     # Son tespit zamanını güncelle
                                                     last_detection_time = current_time
@@ -385,7 +406,7 @@ def stop_detection():
     """Gerçek zamanlı tespiti durdur"""
     global detection_active
     
-    logger.info("🛑 Gerçek zamanlı tespit durduruluyor")
+    logger.info("🛑 Gerçek zamanlı tespit durdurma isteği")
     
     try:
         detection_active = False
@@ -398,6 +419,26 @@ def stop_detection():
     except Exception as e:
         logger.error(f"❌ Tespit durdurma hatası: {str(e)}")
         return jsonify({'error': 'Tespit durdurma başarısız'}), 500
+
+@app.route('/api/detection/latest', methods=['GET'])
+def get_latest_detection():
+    """En son tespit sonucunu döndür"""
+    global last_detection_result
+    
+    if last_detection_result is None:
+        return jsonify({
+            'has_result': False,
+            'message': 'Henüz tespit yapılmadı'
+        })
+    
+    # Sonucu döndür ve sıfırla (bir kez göster)
+    result = last_detection_result.copy()
+    last_detection_result = None
+    
+    return jsonify({
+        'has_result': True,
+        'result': result
+    })
 
 @app.route('/api/plates', methods=['GET'])
 def get_plates():

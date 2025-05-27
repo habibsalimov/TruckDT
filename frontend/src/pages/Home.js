@@ -50,20 +50,25 @@ function Home() {
   };
 
   const handleDetectionResult = (result) => {
+    console.log('🔍 Tespit sonucu alındı:', result);
     setDetectionResult(result);
     setLastDetection(new Date().toLocaleTimeString('tr-TR'));
     
     // Sistem durumunu güncelle
     if (result.gate_action === 'open') {
+      console.log('✅ Kapı açılacak - sistemi success durumuna geçiriyorum');
       setSystemStatus('success');
     } else if (result.gate_action === 'denied') {
+      console.log('❌ Erişim reddedildi - sistemi denied durumuna geçiriyorum');
       setSystemStatus('denied');
     } else {
+      console.log('📊 Diğer durum - sistemi ready durumuna geçiriyorum');
       setSystemStatus('ready');
     }
 
     // 5 saniye sonra durumu sıfırla
     setTimeout(() => {
+      console.log('🔄 Sistem durumu sıfırlanıyor');
       setSystemStatus('ready');
     }, 5000);
   };
@@ -118,6 +123,15 @@ function Home() {
           </Typography>
         )}
       </Paper>
+
+      {/* Demo Modu Bildirimi */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2">
+          🎭 <strong>Demo Modu:</strong> OCR sistemi simülasyon modunda çalışıyor. 
+          Gerçek plaka okuma yerine yapay plaka tespiti kullanılmaktadır. 
+          Demo plakaları: 34ABC1234, 06DEF5678, 35GHI9012 (yetkili) ve diğerleri (yetkisiz).
+        </Typography>
+      </Alert>
 
       <Grid container spacing={3}>
         {/* Sol Panel - Kamera ve Kontroller */}
